@@ -31,13 +31,17 @@ It allows precise and customizable conversions by supporting multiple color diff
 
 ## Installation
 
-This application need [.NET Desktop Runtime 8.0](https://dotnet.microsoft.com/it-it/download/dotnet/8.0/runtime).
-
 Download the [latest release](https://github.com/Criper98/Wplace-Palette-Converter/releases/latest) and run!
+
+This application need [.NET Desktop Runtime 8.0](https://dotnet.microsoft.com/it-it/download/dotnet/8.0/runtime).
 
 ### Build
 
-Or clone the repository and publish the Visual Studio project.
+Clone the repository and publish the Visual Studio project.
+
+```bash
+dotnet publish -p:PublishProfile=FolderProfile
+```
 
 ## Usage
 

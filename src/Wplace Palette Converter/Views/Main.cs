@@ -22,7 +22,7 @@ namespace WplacePaletteConverter.Views
 		private Bitmap? inputImageCopy = null;
 		private Bitmap? outputImage = null;
 		private Models.WplaceColor[] wplaceColors; // Defined in constructor
-		private ConcurrentDictionary<(Color, Enums.ComparisonMethods), Color> cache = [];
+		private ConcurrentDictionary<(int, Enums.ComparisonMethods), Color> cache = [];
 		private bool saved = true;
 		private Task conversionTask = Task.CompletedTask;
 		private long currentPixel = 0;
@@ -78,6 +78,7 @@ namespace WplacePaletteConverter.Views
 					return;
 				}
 
+				saved = true;
 				Invoke(() => Close());
 			});
 		}
@@ -120,9 +121,9 @@ namespace WplacePaletteConverter.Views
 
 						Color pixel = Color.FromArgb(a, r, g, b);
 
-						Color closestColor = cache.TryGetValue((pixel, method), out Color cached)
+						Color closestColor = cache.TryGetValue((pixel.ToArgb(), method), out Color cached)
 							? cached
-							: (cache[(pixel, method)] = pixel.GetMostSimilar(wplaceColors, method));
+							: (cache[(pixel.ToArgb(), method)] = pixel.GetMostSimilar(wplaceColors, method));
 
 						row[index] = closestColor.B;
 						row[index + 1] = closestColor.G;
@@ -301,7 +302,7 @@ namespace WplacePaletteConverter.Views
 
 		private void chkFitPicBoxSize_CheckedChanged(object sender, EventArgs e)
 		{
-			if (outputImage == null)
+			if (outputImage == null || !conversionTask.IsCompleted)
 				return;
 
 			picOutput.Image = chkFitPicBoxSize.Checked ? outputImage.ResizeWithoutInterpolation(picOutput) : outputImage;
@@ -357,7 +358,7 @@ namespace WplacePaletteConverter.Views
 				return;
 			}
 
-			Models.WplaceColor? wpColor = wplaceColors.FirstOrDefault(x => x.Color == color);
+			Models.WplaceColor? wpColor = wplaceColors.FirstOrDefault(x => x.Color.ToArgb() == color.ToArgb());
 
 			if (wpColor == null) {
 				lblWplaceColorName.Text = "";

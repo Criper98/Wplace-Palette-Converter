@@ -16,13 +16,12 @@ namespace WplacePaletteConverter.Extensions
 			int height = (int)(src.Height * ((double)pictureBox.ClientSize.Width / src.Width));
 			int width = pictureBox.ClientSize.Width;
 
-			if (height > pictureBox.ClientSize.Height)
-			{
+			if (height > pictureBox.ClientSize.Height) {
 				width = (int)(src.Width * ((double)pictureBox.ClientSize.Height / src.Height));
 				height = pictureBox.ClientSize.Height;
 			}
 
-			Bitmap dest = new(width, height, src.PixelFormat);
+			Bitmap dest = new(width, height, PixelFormat.Format32bppArgb);
 			using Graphics g = Graphics.FromImage(dest);
 			g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
 			g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.Half;

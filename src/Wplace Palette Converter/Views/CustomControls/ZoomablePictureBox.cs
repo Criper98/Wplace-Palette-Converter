@@ -26,7 +26,7 @@ namespace WplacePaletteConverter.Views.CustomControls
 			DoubleBuffered = true;
 		}
 
-		private void ZoomablePictureBox_MouseWheel(object sender, MouseEventArgs e)
+		private void ZoomablePictureBox_MouseWheel(object? sender, MouseEventArgs e)
 		{
 			float oldZoom = _zoom;
 			if (e.Delta > 0)
@@ -44,7 +44,7 @@ namespace WplacePaletteConverter.Views.CustomControls
 			Invalidate();
 		}
 
-		private void ZoomablePictureBox_MouseDown(object sender, MouseEventArgs e)
+		private void ZoomablePictureBox_MouseDown(object? sender, MouseEventArgs e)
 		{
 			if (e.Button != MouseButtons.Left)
 				return;
@@ -53,7 +53,7 @@ namespace WplacePaletteConverter.Views.CustomControls
 			_panStart = e.Location;
 		}
 
-		private void ZoomablePictureBox_MouseMove(object sender, MouseEventArgs e)
+		private void ZoomablePictureBox_MouseMove(object? sender, MouseEventArgs e)
 		{
 			if (!_panning)
 				return;
@@ -65,19 +65,20 @@ namespace WplacePaletteConverter.Views.CustomControls
 			Invalidate();
 		}
 
-		private void ZoomablePictureBox_MouseUp(object sender, MouseEventArgs e)
+		private void ZoomablePictureBox_MouseUp(object? sender, MouseEventArgs e)
 		{
 			if (e.Button == MouseButtons.Left)
 				_panning = false;
 		}
 
-		private void ZoomablePictureBox_Paint(object sender, PaintEventArgs e)
+		private void ZoomablePictureBox_Paint(object? sender, PaintEventArgs e)
 		{
 			if (Image == null)
 				return;
 
 			e.Graphics.Clear(BackColor);
 			e.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
+			e.Graphics.PixelOffsetMode = PixelOffsetMode.Half;
 
 			e.Graphics.TranslateTransform(_offset.X, _offset.Y);
 			e.Graphics.ScaleTransform(_zoom, _zoom);
