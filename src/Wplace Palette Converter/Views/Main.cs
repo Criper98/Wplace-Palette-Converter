@@ -22,7 +22,7 @@ namespace WplacePaletteConverter.Views
 		private Bitmap? inputImageCopy = null;
 		private Bitmap? outputImage = null;
 		private Models.WplaceColor[] wplaceColors; // Defined in constructor
-		private ConcurrentDictionary<(int, Enums.ComparisonMethods), Color> cache = [];
+		private ConcurrentDictionary<(uint, Enums.ComparisonMethods), Color> cache = [];
 		private bool saved = true;
 		private Task conversionTask = Task.CompletedTask;
 		private long currentPixel = 0;
@@ -121,11 +121,27 @@ namespace WplacePaletteConverter.Views
 
 						Color pixel = Color.FromArgb(a, r, g, b);
 
-						Color closestColor = cache.TryGetValue((pixel.ToArgb(), method), out Color cached)
-							? cached
-							: (cache[(pixel.ToArgb(), method)] = pixel.GetMostSimilar(wplaceColors, method));
+                        // PERF: We already have all the components needed to create the ARGB value,
+                        // so we compute it directly here and avoid the expensive ToArgb() call.
+                        // Creating a Color just to retrieve its ARGB value would be redundant.
+                        const int ARGBAlphaShift = 24;
+                        const int ARGBRedShift = 16;
+                        const int ARGBGreenShift = 8;
+                        const int ARGBBlueShift = 0;
 
-						row[index] = closestColor.B;
+                        uint argbValue = (uint)a << ARGBAlphaShift |
+							(uint)r << ARGBRedShift |
+							(uint)g << ARGBGreenShift |
+							(uint)b << ARGBBlueShift;
+
+                        // One of the most expensive operations currently is checking whether
+                        // a color has already been cached. To improve performance, consider implementing
+                        // a custom cache optimized for faster lookups.
+                        Color closestColor = cache.TryGetValue((argbValue, method), out Color cached)
+                            ? cached
+                            : (cache[(argbValue, method)] = pixel.GetMostSimilar(wplaceColors, method));
+
+                        row[index] = closestColor.B;
 						row[index + 1] = closestColor.G;
 						row[index + 2] = closestColor.R;
 						row[index + 3] = closestColor.A;
