@@ -13,52 +13,52 @@ using System.Windows.Forms;
 
 namespace WplacePaletteConverter.Services
 {
-	internal static class AutoUpdater
-	{
-		private static JObject latestReleaseJson = [];
-		private static readonly string MyExeName = Process.GetCurrentProcess().MainModule?.ModuleName ?? "Wplace Palette Converter.exe";
+    internal static class AutoUpdater
+    {
+        private static JObject latestReleaseJson = [];
+        private static readonly string MyExeName = Process.GetCurrentProcess().MainModule?.ModuleName ?? "Wplace Palette Converter.exe";
 
-		public static bool CheckForUpdates()
-		{
-			using HttpClient client = new();
-			using HttpRequestMessage request = new(
-				HttpMethod.Get,
-				"https://api.github.com/repos/Criper98/Wplace-Palette-Converter/releases/latest"
-			);
+        public static bool CheckForUpdates()
+        {
+            using HttpClient client = new();
+            using HttpRequestMessage request = new(
+                HttpMethod.Get,
+                "https://api.github.com/repos/Criper98/Wplace-Palette-Converter/releases/latest"
+            );
 
-			client.Timeout = TimeSpan.FromMilliseconds(2500);
-			request.Headers.Add("User-Agent", "Wplace Palette Converter");
-			HttpResponseMessage response = client.Send(request);
+            client.Timeout = TimeSpan.FromMilliseconds(2500);
+            request.Headers.Add("User-Agent", "Wplace Palette Converter");
+            HttpResponseMessage response = client.Send(request);
 
-			if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-				return false;
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                return false;
 
-			latestReleaseJson = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            latestReleaseJson = JObject.Parse(response.Content.ReadAsStringAsync().Result);
 
-			if ((string?)latestReleaseJson["tag_name"] != Application.ProductVersion)
-				return true;
+            if ((string?)latestReleaseJson["tag_name"] != Application.ProductVersion)
+                return true;
 
-			return false;
-		}
+            return false;
+        }
 
-		public static void Download()
-		{
-			string downloadUrl = (string?)latestReleaseJson["assets"]?[0]?["browser_download_url"] ?? "";
+        public static void Download()
+        {
+            string downloadUrl = (string?)latestReleaseJson["assets"]?[0]?["browser_download_url"] ?? "";
 
-			if (downloadUrl == "")
-				throw new Exception("Download URL not found.");
+            if (downloadUrl == "")
+                throw new Exception("Download URL not found.");
 
-			using HttpClient client = new();
-			using Task<Stream> stream = client.GetStreamAsync(downloadUrl);
+            using HttpClient client = new();
+            using Task<Stream> stream = client.GetStreamAsync(downloadUrl);
 
-			using FileStream fileStream = new(Global.WorkingDirectory + "wppc_new.exe", FileMode.Create);
-			stream.Result.CopyTo(fileStream);
-		}
+            using FileStream fileStream = new(Global.WorkingDirectory + "wppc_new.exe", FileMode.Create);
+            stream.Result.CopyTo(fileStream);
+        }
 
-		public static void Update()
-		{
-			File.WriteAllText(Global.WorkingDirectory + "update.bat",
-				$"""
+        public static void Update()
+        {
+            File.WriteAllText(Global.WorkingDirectory + "update.bat",
+                $"""
 				@echo off
 				timeout /t 2 /nobreak > NUL
 				taskkill /f /im "{MyExeName}"
@@ -66,14 +66,14 @@ namespace WplacePaletteConverter.Services
 				start "" "{Global.WorkingDirectory}{MyExeName}"
 				del "%~f0" & exit
 				"""
-			);
+            );
 
-			Process.Start(new ProcessStartInfo
-			{
-				FileName = Global.WorkingDirectory + "update.bat",
-				UseShellExecute = true,
-				WindowStyle = ProcessWindowStyle.Hidden
-			});
-		}
-	}
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = Global.WorkingDirectory + "update.bat",
+                UseShellExecute = true,
+                WindowStyle = ProcessWindowStyle.Hidden
+            });
+        }
+    }
 }

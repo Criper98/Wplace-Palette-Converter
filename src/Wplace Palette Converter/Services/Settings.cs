@@ -13,65 +13,65 @@ using System.Threading.Tasks;
 
 namespace WplacePaletteConverter.Services
 {
-	internal static class Settings
-	{
-		private static readonly string filePath = Global.WorkingDirectory + "settings.json";
+    internal static class Settings
+    {
+        private static readonly string filePath = Global.WorkingDirectory + "settings.json";
 
-		// ====[ SETTINGS ON FILE ]====
+        // ====[ SETTINGS ON FILE ]====
 
-		public static Models.WplaceColor[] WplaceFreePalette = [];
-		public static Models.WplaceColor[] WplaceLockedPalette = [];
+        public static Models.WplaceColor[] WplaceFreePalette = [];
+        public static Models.WplaceColor[] WplaceLockedPalette = [];
 
-		// ================================
+        // ================================
 
-		public static void Init()
-		{
-			WplaceFreePalette = Global.WplaceFreePalette;
-			WplaceLockedPalette = Global.WplaceLockedPalette;
-		}
+        public static void Init()
+        {
+            WplaceFreePalette = Global.WplaceFreePalette;
+            WplaceLockedPalette = Global.WplaceLockedPalette;
+        }
 
-		public static void Save()
-		{
-			JObject json = [];
+        public static void Save()
+        {
+            JObject json = [];
 
-			FieldInfo[] fields = typeof(Settings).GetFields();
+            FieldInfo[] fields = typeof(Settings).GetFields();
 
-			foreach (FieldInfo fi in fields)
-				json[fi.Name] = JToken.FromObject(fi.GetValue(null)!);
+            foreach (FieldInfo fi in fields)
+                json[fi.Name] = JToken.FromObject(fi.GetValue(null)!);
 
-			File.WriteAllText(filePath, json.ToString());
-		}
+            File.WriteAllText(filePath, json.ToString());
+        }
 
-		public static void Read()
-		{
-			if (!File.Exists(filePath))
-			{
-				Init();
-				Save();
-				return;
-			}
+        public static void Read()
+        {
+            if (!File.Exists(filePath))
+            {
+                Init();
+                Save();
+                return;
+            }
 
-			string fileContent;
-			JObject json;
+            string fileContent;
+            JObject json;
 
-			try
-			{
-				fileContent = File.ReadAllText(filePath);
-				json = JObject.Parse(fileContent);
-			}
-			catch
-			{
-				Init();
-				Save();
-				return;
-			}
+            try
+            {
+                fileContent = File.ReadAllText(filePath);
+                json = JObject.Parse(fileContent);
+            }
+            catch
+            {
+                Init();
+                Save();
+                return;
+            }
 
-			FieldInfo[] fields = typeof(Settings).GetFields();
+            FieldInfo[] fields = typeof(Settings).GetFields();
 
-			foreach (FieldInfo fi in fields)
-				if (json.TryGetValue(fi.Name, out JToken? jk))
-					fi.SetValue(null, jk.ToObject(fi.FieldType));
-		}
+            foreach (FieldInfo fi in fields)
+                if (json.TryGetValue(fi.Name, out JToken? jk))
+                    fi.SetValue(null, jk.ToObject(fi.FieldType));
+        }
 
-	}
+    }
 }

@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace WplacePaletteConverter.Enums
 {
-	internal enum ComparisonMethods
-	{
-		CIEDE2000,
-		JzCzhzDEz,
-		CIE94,
-		CIE76,
-		Euclidean
-	}
+    internal enum ComparisonMethods
+    {
+        CIEDE2000,
+        JzCzhzDEz,
+        CIE94,
+        CIE76,
+        Euclidean
+    }
 }

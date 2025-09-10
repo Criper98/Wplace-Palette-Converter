@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace WplacePaletteConverter.Models
 {
-	internal class ColorMatch(Color input, Color output, Enums.ComparisonMethods method)
-	{
-		public Color Input = input;
-		public Color Output = output;
-		public Enums.ComparisonMethods Method = method;
-	}
+    internal class ColorMatch(Color input, Color output, Enums.ComparisonMethods method)
+    {
+        public Color Input = input;
+        public Color Output = output;
+        public Enums.ComparisonMethods Method = method;
+    }
 }
