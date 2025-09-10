@@ -101,6 +101,22 @@ namespace WplacePaletteConverter.Views.CustomControls
 			this.Invalidate();
 		}
 
+		public Point GetPixelCoordinates(Point p)
+		{
+			if (Image == null)
+				return new(-1, -1);
+
+			PointF imgPoint = new((p.X - _offset.X) / _zoom, (p.Y - _offset.Y) / _zoom);
+
+			if (imgPoint.X >= 0 && imgPoint.Y >= 0 &&
+				imgPoint.X < Image.Width && imgPoint.Y < Image.Height)
+			{
+				return new((int)imgPoint.X, (int)imgPoint.Y);
+			}
+
+			return new(-1, -1); // Return invalid point if out of bounds
+		}
+
 		public Color GetPixel(Point p)
 		{
 			if (_panning)
@@ -112,13 +128,12 @@ namespace WplacePaletteConverter.Views.CustomControls
 			}
 			else if (Image != null)
 			{
-				PointF imgPoint = new((p.X - _offset.X) / _zoom, (p.Y - _offset.Y) / _zoom);
+				Point imgPoint = GetPixelCoordinates(p);
 
-				if (imgPoint.X >= 0 && imgPoint.Y >= 0 &&
-					imgPoint.X < Image.Width && imgPoint.Y < Image.Height)
+				if (imgPoint.X >= 0)
 				{
 					Bitmap bmp = (Bitmap)Image;
-					return bmp.GetPixel((int)imgPoint.X, (int)imgPoint.Y);
+					return bmp.GetPixel(imgPoint.X, imgPoint.Y);
 				}
 			}
 

@@ -72,6 +72,40 @@ namespace WplacePaletteConverter.Extensions
 			return dest;
 		}
 
+		public static Bitmap ApplySaturation(this Bitmap src, float saturation)
+		{
+			float lumR = 0.3086f;
+			float lumG = 0.6094f;
+			float lumB = 0.0820f;
+
+			float sr = (1 - saturation) * lumR;
+			float sg = (1 - saturation) * lumG;
+			float sb = (1 - saturation) * lumB;
+
+			ColorMatrix colorMatrix = new([
+				[sr + saturation, sr, sr, 0, 0],
+				[sg, sg + saturation, sg, 0, 0],
+				[sb, sb, sb + saturation, 0, 0],
+				[0, 0, 0, 1, 0],
+				[0, 0, 0, 0, 1]
+			]);
+
+			Bitmap result = new(src.Width, src.Height);
+			using Graphics g = Graphics.FromImage(result);
+			using ImageAttributes attributes = new();
+			
+			attributes.SetColorMatrix(colorMatrix);
+			g.DrawImage(
+				src,
+				new Rectangle(0, 0, src.Width, src.Height),
+				0, 0, src.Width, src.Height,
+				GraphicsUnit.Pixel,
+				attributes
+			);
+
+			return result;
+		}
+
 		public static Bitmap ResizeForDGV(this Bitmap btmp, DataGridView dgv)
 		{
 			double height = dgv.RowTemplate.Height;

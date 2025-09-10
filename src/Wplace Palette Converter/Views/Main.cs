@@ -46,7 +46,9 @@ namespace WplacePaletteConverter.Views
 				..Services.Global.WplaceLockedPalette.Where(x => x.Used)
 			];
 
-			Task.Run(() => {
+			// Check for updates in the background
+			Task.Run(() =>
+			{
 				bool updateAvailable;
 				DialogResult dialogResult = DialogResult.None;
 
@@ -64,7 +66,8 @@ namespace WplacePaletteConverter.Views
 					return;
 
 				try { Services.AutoUpdater.Download(); }
-				catch (Exception ex) {
+				catch (Exception ex)
+				{
 					Invoke(() => MessageBox.Show("Failed to download the update.\n" + ex.Message, "Update Failed", MessageBoxButtons.OK, MessageBoxIcon.Error));
 					return;
 				}
@@ -73,7 +76,8 @@ namespace WplacePaletteConverter.Views
 					Thread.Sleep(100);
 
 				try { Services.AutoUpdater.Update(); }
-				catch (Exception ex) {
+				catch (Exception ex)
+				{
 					Invoke(() => MessageBox.Show("Failed to start the updater.\n" + ex.Message, "Update Failed", MessageBoxButtons.OK, MessageBoxIcon.Error));
 					return;
 				}
@@ -121,27 +125,25 @@ namespace WplacePaletteConverter.Views
 
 						Color pixel = Color.FromArgb(a, r, g, b);
 
-                        // PERF: We already have all the components needed to create the ARGB value,
-                        // so we compute it directly here and avoid the expensive ToArgb() call.
-                        // Creating a Color just to retrieve its ARGB value would be redundant.
-                        const int ARGBAlphaShift = 24;
-                        const int ARGBRedShift = 16;
-                        const int ARGBGreenShift = 8;
-                        const int ARGBBlueShift = 0;
+						const int ARGBAlphaShift = 24;
+						const int ARGBRedShift = 16;
+						const int ARGBGreenShift = 8;
+						const int ARGBBlueShift = 0;
 
-                        uint argbValue = (uint)a << ARGBAlphaShift |
+						uint argbValue = (uint)a << ARGBAlphaShift |
 							(uint)r << ARGBRedShift |
 							(uint)g << ARGBGreenShift |
 							(uint)b << ARGBBlueShift;
 
-                        // One of the most expensive operations currently is checking whether
-                        // a color has already been cached. To improve performance, consider implementing
-                        // a custom cache optimized for faster lookups.
-                        Color closestColor = cache.TryGetValue((argbValue, method), out Color cached)
-                            ? cached
-                            : (cache[(argbValue, method)] = pixel.GetMostSimilar(wplaceColors, method));
+						// TODO:
+						// One of the most expensive operations currently is checking whether
+						// a color has already been cached. To improve performance, consider implementing
+						// a custom cache optimized for faster lookups.
+						Color closestColor = cache.TryGetValue((argbValue, method), out Color cached)
+							? cached
+							: (cache[(argbValue, method)] = pixel.GetMostSimilar(wplaceColors, method));
 
-                        row[index] = closestColor.B;
+						row[index] = closestColor.B;
 						row[index + 1] = closestColor.G;
 						row[index + 2] = closestColor.R;
 						row[index + 3] = closestColor.A;
@@ -150,7 +152,8 @@ namespace WplacePaletteConverter.Views
 			}
 			outputImage.UnlockBits(data);
 
-			Invoke(() => {
+			Invoke(() =>
+			{
 				picOutput.Image = chkFitPicBoxSize.Checked ? outputImage.ResizeWithoutInterpolation(picOutput) : outputImage;
 				picOutput.ResetView();
 				saveAsToolStripMenuItem.Enabled = true;
@@ -158,9 +161,19 @@ namespace WplacePaletteConverter.Views
 			saved = false;
 		}
 
+		private void EditImage()
+		{
+			if (inputImage == null || inputImageCopy == null)
+				return;
+
+			inputImage = inputImageCopy.ApplyContrast(trkContrast.Value / 100f);
+			picInput.Image = inputImage.ResizeWithoutInterpolation(picInput);
+		}
+
 		private void LoadingUpdater(long totalPixels)
 		{
-			while (!conversionTask.IsCompleted) {
+			while (!conversionTask.IsCompleted)
+			{
 				float progress = (float)currentPixel / totalPixels * 100;
 				Invoke(() => lblLoadingInfo.Text = $"Converting Pixels: {progress:N2}%...");
 				Thread.Sleep(50);
@@ -188,6 +201,7 @@ namespace WplacePaletteConverter.Views
 			inputImageCopy = new(inputImage);
 			picInput.Image = inputImage.ResizeWithoutInterpolation(picInput);
 			picInput.ResetView();
+			lblImageSize.Text = $"{inputImage.Width}x{inputImage.Height}";
 			conversionTask = Task.Run(DoConversion);
 		}
 
@@ -290,7 +304,8 @@ namespace WplacePaletteConverter.Views
 
 			lblContrast.Text = (trkContrast.Value - 100).ToString();
 
-			inputImage = inputImageCopy.ApplyContrast(trkContrast.Value / 100f);
+			inputImage = inputImageCopy.ApplySaturation(trkSaturation.Value / 100f);
+			inputImage = inputImage.ApplyContrast(trkContrast.Value / 100f);
 			picInput.Image = inputImage.ResizeWithoutInterpolation(picInput);
 		}
 
@@ -298,6 +313,35 @@ namespace WplacePaletteConverter.Views
 		{
 			if (e.Button == MouseButtons.Right)
 				trkContrast.Value = 100;
+
+			if (IsTaskRunning())
+				return;
+
+			if (inputImage == null || inputImageCopy == null)
+				return;
+
+			conversionTask = Task.Run(DoConversion);
+		}
+
+		private void trkSaturation_ValueChanged(object sender, EventArgs e)
+		{
+			if (IsTaskRunning())
+				return;
+
+			if (inputImage == null || inputImageCopy == null)
+				return;
+
+			lblSaturation.Text = (trkSaturation.Value - 100).ToString();
+
+			inputImage = inputImageCopy.ApplyContrast(trkContrast.Value / 100f);
+			inputImage = inputImage.ApplySaturation(trkSaturation.Value / 100f);
+			picInput.Image = inputImage.ResizeWithoutInterpolation(picInput);
+		}
+
+		private void trkSaturation_MouseUp(object sender, MouseEventArgs e)
+		{
+			if (e.Button == MouseButtons.Right)
+				trkSaturation.Value = 100;
 
 			if (IsTaskRunning())
 				return;
@@ -366,9 +410,11 @@ namespace WplacePaletteConverter.Views
 
 		private void picOutput_MouseMove(object sender, MouseEventArgs e)
 		{
+			Point coord = picOutput.GetPixelCoordinates(e.Location);
 			Color color = picOutput.GetPixel(e.Location);
 
-			if (color.IsEmpty) {
+			if (color.IsEmpty)
+			{
 				lblWplaceColorName.Text = "";
 				lblWplaceColor.BackColor = Color.Transparent;
 				return;
@@ -376,13 +422,14 @@ namespace WplacePaletteConverter.Views
 
 			Models.WplaceColor? wpColor = wplaceColors.FirstOrDefault(x => x.Color.ToArgb() == color.ToArgb());
 
-			if (wpColor == null) {
+			if (wpColor == null)
+			{
 				lblWplaceColorName.Text = "";
 				lblWplaceColor.BackColor = Color.Transparent;
 				return;
 			}
 
-			lblWplaceColorName.Text = wpColor.Name;
+			lblWplaceColorName.Text = $"{wpColor.Name} [{coord.X}x{coord.Y}]";
 			lblWplaceColor.BackColor = wpColor.Color;
 		}
 
@@ -393,7 +440,8 @@ namespace WplacePaletteConverter.Views
 
 		private void Main_FormClosing(object sender, FormClosingEventArgs e)
 		{
-			if (IsTaskRunning()) {
+			if (IsTaskRunning())
+			{
 				e.Cancel = true;
 				return;
 			}

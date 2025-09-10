@@ -11,16 +11,12 @@ namespace WplacePaletteConverter.Extensions
 {
 	internal static class ColorExt
 	{
-        // PERF: Initialize the color difference algorithm once to save time, memory,
-        // and reduce GC pressure. This avoids creating a new instance every time
-        // we need to calculate the distance between two colors.
         private static readonly CIEDE2000ColorDifference cIEDE2000ColorDifference = new();
         private static readonly CIE94ColorDifference cIE94ColorDifference = new();
         private static readonly CIE76ColorDifference cIE76ColorDifference = new();
         private static readonly JzCzhzDEzColorDifference jzCzhzDEzColorDifference = new();
         private static readonly EuclideanDistanceColorDifference<XYZColor> euclideanDistanceColorDifference = new();
 
-        // PERF: Do the same for converters.
         private static readonly IColorConverter<RGBColor, LabColor> rgbToLabConverter = new ConverterBuilder().FromRGB().ToLab().Build();
         private static readonly IColorConverter<RGBColor, JzCzhzColor> rgbToJzCzhzConverter = new ConverterBuilder().FromRGB().ToJzCzhz().Build();
         private static readonly IColorConverter<RGBColor, XYZColor> rgbToXYZConverter = new ConverterBuilder().FromRGB().ToXYZ(RGBWorkingSpaces.sRGB.WhitePoint).Build();
@@ -29,10 +25,6 @@ namespace WplacePaletteConverter.Extensions
 		{
 			Color? closestColor = null;
 			double closestDistance = double.MaxValue;
-
-            // PERF: Precompute LabColor once from the input, even if it's not always used.
-            // This is the most expensive color conversion, and it's also the most commonly
-            // used—since the first three conversion options typically depend on it.
             LabColor labColor = input.ToLabColor();
 
             foreach (Models.WplaceColor wpColor in wpColors)

@@ -56,10 +56,15 @@ namespace WplacePaletteConverter.Views
 			trkContrast = new TrackBar();
 			label5 = new Label();
 			lblContrast = new Label();
+			lblImageSize = new Label();
+			lblSaturation = new Label();
+			label7 = new Label();
+			trkSaturation = new TrackBar();
 			menuStrip1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)picInput).BeginInit();
 			((System.ComponentModel.ISupportInitialize)picOutput).BeginInit();
 			((System.ComponentModel.ISupportInitialize)trkContrast).BeginInit();
+			((System.ComponentModel.ISupportInitialize)trkSaturation).BeginInit();
 			SuspendLayout();
 			// 
 			// menuStrip1
@@ -83,34 +88,34 @@ namespace WplacePaletteConverter.Views
 			// 
 			openToolStripMenuItem.Image = Properties.Resources.open;
 			openToolStripMenuItem.Name = "openToolStripMenuItem";
-			openToolStripMenuItem.Size = new Size(180, 22);
+			openToolStripMenuItem.Size = new Size(123, 22);
 			openToolStripMenuItem.Text = "Open...";
 			openToolStripMenuItem.Click += openToolStripMenuItem_Click;
 			// 
 			// toolStripSeparator1
 			// 
 			toolStripSeparator1.Name = "toolStripSeparator1";
-			toolStripSeparator1.Size = new Size(177, 6);
+			toolStripSeparator1.Size = new Size(120, 6);
 			// 
 			// saveAsToolStripMenuItem
 			// 
 			saveAsToolStripMenuItem.Enabled = false;
 			saveAsToolStripMenuItem.Image = Properties.Resources.save;
 			saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-			saveAsToolStripMenuItem.Size = new Size(180, 22);
+			saveAsToolStripMenuItem.Size = new Size(123, 22);
 			saveAsToolStripMenuItem.Text = "Save As...";
 			saveAsToolStripMenuItem.Click += saveAsToolStripMenuItem_Click;
 			// 
 			// toolStripSeparator2
 			// 
 			toolStripSeparator2.Name = "toolStripSeparator2";
-			toolStripSeparator2.Size = new Size(177, 6);
+			toolStripSeparator2.Size = new Size(120, 6);
 			// 
 			// closeToolStripMenuItem
 			// 
 			closeToolStripMenuItem.Image = Properties.Resources.close;
 			closeToolStripMenuItem.Name = "closeToolStripMenuItem";
-			closeToolStripMenuItem.Size = new Size(180, 22);
+			closeToolStripMenuItem.Size = new Size(123, 22);
 			closeToolStripMenuItem.Text = "Close";
 			closeToolStripMenuItem.Click += closeToolStripMenuItem_Click;
 			// 
@@ -118,7 +123,7 @@ namespace WplacePaletteConverter.Views
 			// 
 			exitToolStripMenuItem.Image = Properties.Resources.exit;
 			exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-			exitToolStripMenuItem.Size = new Size(180, 22);
+			exitToolStripMenuItem.Size = new Size(123, 22);
 			exitToolStripMenuItem.Text = "Exit";
 			exitToolStripMenuItem.Click += exitToolStripMenuItem_Click;
 			// 
@@ -193,9 +198,9 @@ namespace WplacePaletteConverter.Views
 			// lblLoadingInfo
 			// 
 			lblLoadingInfo.Font = new Font("Segoe UI", 9F);
-			lblLoadingInfo.Location = new Point(495, 71);
+			lblLoadingInfo.Location = new Point(643, 71);
 			lblLoadingInfo.Name = "lblLoadingInfo";
-			lblLoadingInfo.Size = new Size(347, 15);
+			lblLoadingInfo.Size = new Size(199, 15);
 			lblLoadingInfo.TabIndex = 6;
 			lblLoadingInfo.TextAlign = ContentAlignment.TopRight;
 			// 
@@ -222,15 +227,15 @@ namespace WplacePaletteConverter.Views
 			// lblWplaceColorName
 			// 
 			lblWplaceColorName.Font = new Font("Segoe UI", 9F);
-			lblWplaceColorName.Location = new Point(487, 492);
+			lblWplaceColorName.Location = new Point(553, 492);
 			lblWplaceColorName.Name = "lblWplaceColorName";
-			lblWplaceColorName.Size = new Size(100, 15);
+			lblWplaceColorName.Size = new Size(150, 15);
 			lblWplaceColorName.TabIndex = 9;
 			// 
 			// lblWplaceColor
 			// 
 			lblWplaceColor.Font = new Font("Segoe UI", 9F);
-			lblWplaceColor.Location = new Point(593, 492);
+			lblWplaceColor.Location = new Point(487, 492);
 			lblWplaceColor.Name = "lblWplaceColor";
 			lblWplaceColor.Size = new Size(60, 15);
 			lblWplaceColor.TabIndex = 10;
@@ -287,11 +292,59 @@ namespace WplacePaletteConverter.Views
 			lblContrast.TabIndex = 14;
 			lblContrast.Text = "0";
 			// 
+			// lblImageSize
+			// 
+			lblImageSize.Font = new Font("Segoe UI", 9F);
+			lblImageSize.Location = new Point(495, 71);
+			lblImageSize.Name = "lblImageSize";
+			lblImageSize.Size = new Size(100, 15);
+			lblImageSize.TabIndex = 15;
+			// 
+			// lblSaturation
+			// 
+			lblSaturation.AutoSize = true;
+			lblSaturation.Font = new Font("Segoe UI", 9F);
+			lblSaturation.Location = new Point(258, 27);
+			lblSaturation.Margin = new Padding(0, 0, 3, 0);
+			lblSaturation.Name = "lblSaturation";
+			lblSaturation.Size = new Size(13, 15);
+			lblSaturation.TabIndex = 18;
+			lblSaturation.Text = "0";
+			// 
+			// label7
+			// 
+			label7.AutoSize = true;
+			label7.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+			label7.Location = new Point(190, 27);
+			label7.Margin = new Padding(3, 0, 0, 0);
+			label7.Name = "label7";
+			label7.Size = new Size(68, 15);
+			label7.TabIndex = 17;
+			label7.Text = "Saturation:";
+			// 
+			// trkSaturation
+			// 
+			trkSaturation.AutoSize = false;
+			trkSaturation.Location = new Point(185, 45);
+			trkSaturation.Maximum = 200;
+			trkSaturation.Minimum = 50;
+			trkSaturation.Name = "trkSaturation";
+			trkSaturation.Size = new Size(167, 23);
+			trkSaturation.TabIndex = 16;
+			trkSaturation.TickStyle = TickStyle.None;
+			trkSaturation.Value = 100;
+			trkSaturation.ValueChanged += trkSaturation_ValueChanged;
+			trkSaturation.MouseUp += trkSaturation_MouseUp;
+			// 
 			// Main
 			// 
 			AutoScaleDimensions = new SizeF(96F, 96F);
 			AutoScaleMode = AutoScaleMode.Dpi;
 			ClientSize = new Size(854, 521);
+			Controls.Add(lblSaturation);
+			Controls.Add(label7);
+			Controls.Add(trkSaturation);
+			Controls.Add(lblImageSize);
 			Controls.Add(lblContrast);
 			Controls.Add(label5);
 			Controls.Add(trkContrast);
@@ -320,6 +373,7 @@ namespace WplacePaletteConverter.Views
 			((System.ComponentModel.ISupportInitialize)picInput).EndInit();
 			((System.ComponentModel.ISupportInitialize)picOutput).EndInit();
 			((System.ComponentModel.ISupportInitialize)trkContrast).EndInit();
+			((System.ComponentModel.ISupportInitialize)trkSaturation).EndInit();
 			ResumeLayout(false);
 			PerformLayout();
 		}
@@ -350,5 +404,9 @@ namespace WplacePaletteConverter.Views
 		private TrackBar trkContrast;
 		private Label label5;
 		private Label lblContrast;
+		private Label lblImageSize;
+		private Label lblSaturation;
+		private Label label7;
+		private TrackBar trkSaturation;
 	}
 }
