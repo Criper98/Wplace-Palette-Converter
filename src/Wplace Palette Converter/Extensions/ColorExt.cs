@@ -9,8 +9,8 @@ using System.Threading.Tasks;
 
 namespace WplacePaletteConverter.Extensions
 {
-	internal static class ColorExt
-	{
+    internal static class ColorExt
+    {
         private static readonly CIEDE2000ColorDifference cIEDE2000ColorDifference = new();
         private static readonly CIE94ColorDifference cIE94ColorDifference = new();
         private static readonly CIE76ColorDifference cIE76ColorDifference = new();
@@ -22,13 +22,13 @@ namespace WplacePaletteConverter.Extensions
         private static readonly IColorConverter<RGBColor, XYZColor> rgbToXYZConverter = new ConverterBuilder().FromRGB().ToXYZ(RGBWorkingSpaces.sRGB.WhitePoint).Build();
 
         public static Color GetMostSimilar(this Color input, Models.WplaceColor[] wpColors, Enums.ComparisonMethods method)
-		{
-			Color? closestColor = null;
-			double closestDistance = double.MaxValue;
+        {
+            Color? closestColor = null;
+            double closestDistance = double.MaxValue;
             LabColor labColor = input.ToLabColor();
 
             foreach (Models.WplaceColor wpColor in wpColors)
-			{
+            {
                 double distance = method switch
                 {
                     Enums.ComparisonMethods.CIEDE2000 => cIEDE2000ColorDifference.ComputeDifference(labColor, wpColor.LabColor),
@@ -40,28 +40,28 @@ namespace WplacePaletteConverter.Extensions
                 };
 
                 if (distance < closestDistance)
-				{
-					closestDistance = distance;
-					closestColor = wpColor.Color;
-				}
-			}
+                {
+                    closestDistance = distance;
+                    closestColor = wpColor.Color;
+                }
+            }
 
-			if (closestColor == null)
-				throw new InvalidOperationException($"No similar color found for input color {input} using method {method}.");
+            if (closestColor == null)
+                throw new InvalidOperationException($"No similar color found for input color {input} using method {method}.");
 
-			return closestColor.Value;
-		}
+            return closestColor.Value;
+        }
 
-		
+
         public static LabColor ToLabColor(this Color color) =>
             rgbToLabConverter.Convert(new(color));
 
-        
+
         public static JzCzhzColor ToJzCzhzColor(this Color color) =>
             rgbToJzCzhzConverter.Convert(new(color));
 
-        
+
         public static XYZColor ToXYZColor(this Color color) =>
             rgbToXYZConverter.Convert(new(color));
-	}
+    }
 }
