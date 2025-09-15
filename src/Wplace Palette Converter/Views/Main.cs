@@ -161,12 +161,14 @@ namespace WplacePaletteConverter.Views
             saved = false;
         }
 
-        private void EditImage()
+        private void EditInputImage()
         {
             if (inputImage == null || inputImageCopy == null)
                 return;
 
             inputImage = inputImageCopy.ApplyContrast(trkContrast.Value / 100f);
+            inputImage = inputImage.ApplySaturation(trkSaturation.Value / 100f);
+
             picInput.Image = inputImage.ResizeWithoutInterpolation(picInput);
         }
 
@@ -305,9 +307,7 @@ namespace WplacePaletteConverter.Views
 
             lblContrast.Text = (trkContrast.Value - 100).ToString();
 
-            inputImage = inputImageCopy.ApplySaturation(trkSaturation.Value / 100f);
-            inputImage = inputImage.ApplyContrast(trkContrast.Value / 100f);
-            picInput.Image = inputImage.ResizeWithoutInterpolation(picInput);
+            EditInputImage();
         }
 
         private void trkContrast_MouseUp(object sender, MouseEventArgs e)
@@ -334,9 +334,7 @@ namespace WplacePaletteConverter.Views
 
             lblSaturation.Text = (trkSaturation.Value - 100).ToString();
 
-            inputImage = inputImageCopy.ApplyContrast(trkContrast.Value / 100f);
-            inputImage = inputImage.ApplySaturation(trkSaturation.Value / 100f);
-            picInput.Image = inputImage.ResizeWithoutInterpolation(picInput);
+            EditInputImage();
         }
 
         private void trkSaturation_MouseUp(object sender, MouseEventArgs e)

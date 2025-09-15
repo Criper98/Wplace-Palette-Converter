@@ -20,6 +20,7 @@ namespace WplacePaletteConverter.Views
             InitializeComponent();
 
             dgvColors.Columns.AddRange(new DataGridViewTextBoxColumn[] {
+                new() { Name = "ID", Visible = false },
                 new() { Name = "Color" },
                 new() { Name = "Name" },
                 new() { Name = "Type" }
@@ -61,6 +62,7 @@ namespace WplacePaletteConverter.Views
             {
                 rows[i] = new();
                 rows[i].CreateCells(dgvColors,
+                    i,
                     "",
                     array[i].Name,
                     array[i].Type.ToString(),
@@ -90,7 +92,8 @@ namespace WplacePaletteConverter.Views
 
             foreach (DataGridViewRow row in dgvColors.Rows)
             {
-                Models.WplaceColor wpColor = wplaceColors[row.Index];
+                int id = (int)row.Cells["ID"].Value;
+                Models.WplaceColor wpColor = wplaceColors[id];
 
                 if (selectFree && wpColor.Type != Enums.WplaceColorType.Free)
                     continue;
@@ -112,8 +115,9 @@ namespace WplacePaletteConverter.Views
             if (e.ColumnIndex != dgvColors.Columns["Sel."].Index)
                 return;
 
+            int id = (int)dgvColors.Rows[e.RowIndex].Cells["ID"].Value;
             DataGridViewRow row = dgvColors.Rows[e.RowIndex];
-            Models.WplaceColor wpColor = wplaceColors[e.RowIndex];
+            Models.WplaceColor wpColor = wplaceColors[id];
             Bitmap iconChecked = Properties.Resources.checked_box.ResizeForDGV(dgvColors);
             Bitmap iconUnchecked = Properties.Resources.unchecked_box.ResizeForDGV(dgvColors);
 
