@@ -13,6 +13,7 @@ namespace WplacePaletteConverter.Models
     internal class WplaceColor(Color color, string name, Enums.WplaceColorType type, bool used) : ICloneable
     {
         public Color Color { get; } = color;
+        public uint ArgbColor { get; } = (uint)color.ToArgb();
         public LabColor LabColor { get; } = color.ToLabColor();
         public JzCzhzColor JzColor { get; } = color.ToJzCzhzColor();
         public XYZColor XYZColor { get; } = color.ToXYZColor();

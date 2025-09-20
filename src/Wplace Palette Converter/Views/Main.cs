@@ -13,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WplacePaletteConverter.Extensions;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace WplacePaletteConverter.Views
 {
@@ -22,6 +23,7 @@ namespace WplacePaletteConverter.Views
         private Bitmap? inputImageCopy = null;
         private Bitmap? outputImage = null;
         private Models.WplaceColor[] wplaceColors; // Defined in constructor
+        private ConcurrentDictionary<Models.WplaceColor, int> usedColors = [];
         private ConcurrentDictionary<(uint, Enums.ComparisonMethods), Color> cache = [];
         private bool saved = true;
         private Task conversionTask = Task.CompletedTask;
@@ -32,6 +34,18 @@ namespace WplacePaletteConverter.Views
         public Main()
         {
             InitializeComponent();
+
+            dgvUsedColors.Columns.AddRange(new DataGridViewTextBoxColumn[] {
+                new() { Name = "ID", Visible = false },
+                new() { Name = "Color", Width = 50 },
+                new() { Name = "Count", Width = 50 },
+                new() { Name = "Name", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill }
+            });
+            dgvUsedColors.Columns.AddRange(new DataGridViewImageColumn[] {
+                new() { Name = "Sel.", AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells }
+            });
+            dgvUsedColors.AutoGenerateColumns = false;
+            //dgvUsedColors.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
 
             Enum.GetNames(typeof(Enums.ComparisonMethods))
                 .ToList()
@@ -96,7 +110,7 @@ namespace WplacePaletteConverter.Views
             long totalPixels = outputImage.Width * outputImage.Height;
             Enums.ComparisonMethods method = Enums.ComparisonMethods.CIEDE2000;
             Invoke(() => method = (Enums.ComparisonMethods)cmbMethod.SelectedIndex);
-            Task.Run(() => LoadingUpdater(totalPixels));
+            Task.Run(() => ProgressUpdater(totalPixels));
 
             BitmapData data = outputImage.LockBits(
                 new(0, 0, outputImage.Width, outputImage.Height),
@@ -147,6 +161,15 @@ namespace WplacePaletteConverter.Views
                         row[index + 1] = closestColor.G;
                         row[index + 2] = closestColor.R;
                         row[index + 3] = closestColor.A;
+
+
+                        // Seems to not work properly, probably due to parallelization.
+                        // Some colors are counted less than they should be.
+                        Models.WplaceColor? wpc = wplaceColors.FirstOrDefault(x => x.ArgbColor == (uint)closestColor.ToArgb());
+                        if (wpc != null && usedColors.TryGetValue(wpc, out int value))
+                            usedColors[wpc] = ++value;
+                        else if (wpc != null)
+                            usedColors[wpc] = 1;
                     }
                 });
             }
@@ -156,9 +179,52 @@ namespace WplacePaletteConverter.Views
             {
                 picOutput.Image = chkFitPicBoxSize.Checked ? outputImage.ResizeWithoutInterpolation(picOutput) : outputImage;
                 picOutput.ResetView();
+                UpdateDgvUsedColors();
                 saveAsToolStripMenuItem.Enabled = true;
             });
             saved = false;
+        }
+
+        private void ProgressUpdater(long totalPixels)
+        {
+            while (!conversionTask.IsCompleted)
+            {
+                float progress = (float)currentPixel / totalPixels * 100;
+                Invoke(() => lblProgressInfo.Text = $"Converting Pixels: {progress:N2}%...");
+                Thread.Sleep(50);
+            }
+
+            Invoke(() => lblProgressInfo.Text = "");
+            currentPixel = 0;
+        }
+
+        private void UpdateDgvUsedColors()
+        {
+            Dictionary<Models.WplaceColor, int> uc = usedColors.OrderBy(x => x.Key.Name).ToDictionary();
+            dgvUsedColors.Rows.Clear();
+            dgvUsedColors.SuspendLayout();
+
+            int colorColumnIndex = dgvUsedColors.Columns["Color"].Index;
+            Bitmap iconChecked = Properties.Resources.checked_box.ResizeForDGV(dgvUsedColors);
+            Bitmap iconUnchecked = Properties.Resources.unchecked_box.ResizeForDGV(dgvUsedColors);
+
+            DataGridViewRow[] rows = new DataGridViewRow[uc.Count];
+            for (int i = 0; i < rows.Length; i++)
+            {
+                rows[i] = new();
+                rows[i].CreateCells(dgvUsedColors,
+                    i,
+                    "",
+                    uc.ElementAt(i).Value,
+                    uc.ElementAt(i).Key.Name,
+                    uc.ElementAt(i).Key.Used ? iconChecked : iconUnchecked
+                );
+
+                rows[i].Cells[colorColumnIndex].Style.BackColor = uc.ElementAt(i).Key.Color;
+            }
+
+            dgvUsedColors.Rows.AddRange(rows);
+            dgvUsedColors.ResumeLayout();
         }
 
         private void EditInputImage()
@@ -170,19 +236,6 @@ namespace WplacePaletteConverter.Views
             inputImage = inputImage.ApplySaturation(trkSaturation.Value / 100f);
 
             picInput.Image = inputImage.ResizeWithoutInterpolation(picInput);
-        }
-
-        private void LoadingUpdater(long totalPixels)
-        {
-            while (!conversionTask.IsCompleted)
-            {
-                float progress = (float)currentPixel / totalPixels * 100;
-                Invoke(() => lblLoadingInfo.Text = $"Converting Pixels: {progress:N2}%...");
-                Thread.Sleep(50);
-            }
-
-            Invoke(() => lblLoadingInfo.Text = "");
-            currentPixel = 0;
         }
 
         private bool IsTaskRunning()
@@ -204,6 +257,7 @@ namespace WplacePaletteConverter.Views
             picInput.Image = inputImage.ResizeWithoutInterpolation(picInput);
             picInput.ResetView();
             lblImageSize.Text = $"{inputImage.Width}x{inputImage.Height}";
+            usedColors.Clear();
             conversionTask = Task.Run(DoConversion);
         }
 
@@ -430,6 +484,11 @@ namespace WplacePaletteConverter.Views
 
             lblWplaceColorName.Text = $"{wpColor.Name} [{coord.X}x{coord.Y}]";
             lblWplaceColor.BackColor = wpColor.Color;
+        }
+
+        private void dgvUsedColors_SelectionChanged(object sender, EventArgs e)
+        {
+            dgvUsedColors.ClearSelection();
         }
 
         private void Main_Click(object sender, EventArgs e)
